@@ -1,0 +1,4 @@
+-> przetestować uczenie globalne metryki 
+-> przygotować testowe zbiory danych z klastrami i odlełościami między nimi
+-> przetestować uczenie tensora metrycznego poprzez całkowanie dłuhości geodezyjnej (wyznaczanie geodezyjnej przez spadek po gradiencie krzywych Beuziera/ sklejanych lub innym algorytmem)
+-> 
