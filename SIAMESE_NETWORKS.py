@@ -15,7 +15,7 @@ from matplotlib import ticker
 # specify the shape of the inputs for our network
 IMG_SHAPE = (28, 28, 1)
 # specify the batch size and number of epochs
-BATCH_SIZE = 32
+BATCH_SIZE = 128
 EPOCHS = 2
 
 MARGIN = 4
@@ -47,7 +47,7 @@ def build_siamese_model(inputShape, embeddingDim=48):
 
 def plot_2d(points, points_color, title):
     x, y, = points.T
-    plt.scatter(x,y, c= points_color)
+    plt.scatter(x,y, c= points_color,cmap="Spectral")
     plt.title(title)
     plt.show()
     
@@ -138,7 +138,7 @@ import numpy as np
 print("[INFO] loading MNIST dataset...")
 (trainX, trainY), (testX, testY) = mnist.load_data()
 
-colors_ = [(1.,0.,0.),(1.,1.,0.),(1.,0.,1.),(0.,1.,0.),(0.,1.,1.),(0.,0.,1.),(1.,1.,0.5),(1.,0.5,0.),(1.,0.,0.5),(0.5,1.,0.)]
+colors_ = [0,1,2,3,4,5,6,7,8,9]
 c = [colors_[i] for i in testY ]
 
 trainX = trainX / 255.0

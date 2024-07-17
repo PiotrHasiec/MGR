@@ -15,7 +15,7 @@ from matplotlib import ticker
 # specify the shape of the inputs for our network
 IMG_SHAPE = (28, 28, 1)
 # specify the batch size and number of epochs
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 EPOCHS = 5
 
 
@@ -114,6 +114,15 @@ def euclidean_distance(vectors):
     # return the euclidean distance between the vectors
     return K.sqrt(K.maximum(sumSquared, K.epsilon()))
 
+def manhatanan_distance(vectors):
+    # unpack the vectors into separate lists
+    (featsA, featsB) = vectors
+    # compute the sum of squared distances between the vectors
+    sumSquared = K.sum(K.abs(featsA - featsB), axis=1,
+        keepdims=True)
+    # return the euclidean distance between the vectors
+    return (K.maximum(sumSquared, K.epsilon()))
+
 def plot_training(H, plotPath):
 	# construct a plot that plots and saves the training history
 	plt.style.use("ggplot")
@@ -171,7 +180,7 @@ featsA = featureExtractor(imgA)
 featsB = featureExtractor(imgB)
 
 # finally, construct the siamese network
-distance = Lambda(euclidean_distance)([featsA, featsB])
+distance = Lambda(manhatanan_distance)([featsA, featsB])
 outputs = Dense(1, activation="sigmoid")(distance)
 model = Model(inputs=[imgA, imgB], outputs=outputs)
 

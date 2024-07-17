@@ -8,10 +8,10 @@ transformator = PCA(30)
 x_train = np.reshape(x_train, (-1,28*28))
 x_test = np.reshape(x_test, (-1,28*28))
 # x_train = transformator.fit_transform(x_train)
-x_train, y_train = x_train[:8000], y_train[:300]
+x_train, y_train = x_train[:20000], y_train[:20000]
 # x_test, y_test =x_test[:100], y_test[:100]
 
-isomap = manifold.Isomap(n_neighbors=20)
+isomap = manifold.Isomap(n_neighbors=3)
 isomap.fit(x_train)
 points2scatter = isomap.transform(x_test)
 
