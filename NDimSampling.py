@@ -39,7 +39,7 @@ class PunktyOdleglosci:
     self.punkty = None
     self.odleglosci_zdyskretyzowane = None
 
-  def generuj(self):
+  def generuj(self, scale):
     """
     Generuje punkty i oblicza zdyskretyzowane odległości.
     """
@@ -50,10 +50,10 @@ class PunktyOdleglosci:
     self.odleglosci_zdyskretyzowane = np.zeros((self.liczba_punktow, self.liczba_punktow))
     for i in range(self.liczba_punktow):
       for j in range(i + 1, self.liczba_punktow):
-        odleglosc = np.linalg.norm(self.punkty[i] - self.punkty[j])
-        odleglosc_zdyskretyzowana = self.min_odleglosc + int((odleglosc - self.min_odleglosc) / self.krok) * self.krok
-        self.odleglosci_zdyskretyzowane[i, j] = odleglosc_zdyskretyzowana
-        self.odleglosci_zdyskretyzowane[j, i] = odleglosc_zdyskretyzowana
+        odleglosc = scale*np.linalg.norm(self.punkty[i] - self.punkty[j])
+        odleglosc_zdyskretyzowana = (self.min_odleglosc + int((odleglosc - self.min_odleglosc) / self.krok) * self.krok)
+        self.odleglosci_zdyskretyzowane[i, j] = odleglosc_zdyskretyzowana#scale*np.linalg.norm(self.punkty[i] - self.punkty[j])
+        self.odleglosci_zdyskretyzowane[j, i] = odleglosc_zdyskretyzowana#scale*np.linalg.norm(self.punkty[i] - self.punkty[j])
 
   def wyswietl_punkty(self):
     """
@@ -76,24 +76,47 @@ class PunktyOdleglosci:
 
     print("\nOdległości zdyskretyzowane:")
     print(self.odleglosci_zdyskretyzowane)
+  def make_pairs(self,n ):
+   
+    pairPoints = []
+    dists = []
+   
+    
 
-# Przykład użycia
-n = 5  # Liczba wymiarów przestrzeni
-liczba_punktow = 10
-# Przykład użycia (kontynuacja)
+    for idxA in range(len(self.punkty)):
 
-min_odleglosc = 0  # Minimalna możliwa odległość
-max_odleglosc = 10  # Maksymalna możliwa odległość
-krok = 0.25  # Krok dyskretyzacji odległości
+      pointA = self.punkty[idxA]
+     
+      Btabel = np.random.choice( len(self.punkty),n )
+      for idxB in Btabel:
+        
+      # prepare a positive pair and update the images and labels
+      # lists, respectively
+        pairPoints.append([pointA,self.punkty[idxB]])
+        dists.append([self.odleglosci_zdyskretyzowane[idxA,idxB]])
 
-# Utwórz obiekt klasy
-punkty_odleglosci = PunktyOdleglosci(n, liczba_punktow, min_odleglosc, max_odleglosc, krok)
+    # return a 2-tuple of our image pairs and labels
+    return (np.array(pairPoints), np.array(dists))
 
-# Wygeneruj punkty i obliczenia odległości
-punkty_odleglosci.generuj()
 
-# Wyświetl punkty
-punkty_odleglosci.wyswietl_punkty()
+if __name__ == "__main__":
+  # Przykład użycia
+  n = 5  # Liczba wymiarów przestrzeni
+  liczba_punktow = 10
+  # Przykład użycia (kontynuacja)
 
-# Wyświetl zdyskretyzowane odległości
-punkty_odleglosci.wyswietl_odleglosci_zdyskretyzowane()
+  min_odleglosc = 0  # Minimalna możliwa odległość
+  max_odleglosc = 10  # Maksymalna możliwa odległość
+  krok = 0.25  # Krok dyskretyzacji odległości
+
+  # Utwórz obiekt klasy
+  punkty_odleglosci = PunktyOdleglosci(n, liczba_punktow, min_odleglosc, max_odleglosc, krok)
+
+  # Wygeneruj punkty i obliczenia odległości
+  punkty_odleglosci.generuj()
+
+  # Wyświetl punkty
+  punkty_odleglosci.wyswietl_punkty()
+
+  # Wyświetl zdyskretyzowane odległości
+  punkty_odleglosci.wyswietl_odleglosci_zdyskretyzowane()

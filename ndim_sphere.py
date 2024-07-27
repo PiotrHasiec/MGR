@@ -46,17 +46,22 @@ class Generators:
         return np.array(point).T+c
 
 
-# fig = plt.figure()
-# ax = fig.add_subplot(projection='3d')
 
 
-# p=generate_ndim_torus(3,600,[2,1,0.5,0.25,0.12,0.06])
-# ax.scatter(p.T[0], p.T[1],  p.T[2])
+def main():
+    fig = plt.figure()
+    ax = fig.add_subplot(projection='3d')
 
-# p=generate_ndim_sphere(4,600,2)
-# ax.scatter(p.T[0], p.T[1],  p.T[2])
 
-# ax.set_xlim([-2.3,2.3])
-# ax.set_ylim([-2.3,2.3])
-# ax.set_zlim([-2.3,2.3])
-# plt.show()
+    p=Generators.generate_ndim_torus(3,4600,[2,1,0.5,0.25,0.12,0.06],[1,0,0])
+    ax.scatter(p.T[0], p.T[1],  p.T[2])
+
+    # p=Generators.generate_ndim_sphere(4,600,2)
+    # ax.scatter(p.T[0], p.T[1],  p.T[2])
+
+    ax.set_xlim([-2.3,2.3])
+    ax.set_ylim([-2.3,2.3])
+    ax.set_zlim([-2.3,2.3])
+    plt.show()
+if __name__ == "__main__":
+    main()
