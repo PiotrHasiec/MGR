@@ -1,11 +1,11 @@
-from DataGeneration import SphereGenerator
+from DataGeneration import DataGenerator
 import keras
 import numpy as np
 import tensorflow as tf
 from sklearn.model_selection import train_test_split
 from matplotlib import pyplot as plt
 def main():
-    sg = SphereGenerator(1)
+    sg = DataGenerator(1)
     points = sg.create_sphere(15)
     pointsPairs,dists = sg.distances(points)
     pointsPairs = np.array(pointsPairs)
