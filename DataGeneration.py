@@ -60,14 +60,26 @@ class DataGenerator:
         phi = np.reshape(phi,(-1))
         return np.stack([theta,phi]).T
     
-    def distances(self,points):
+    def distances(self,points,n=None):
         distances = []
         pairOfPoints = []
-        for p1 in points:
-            for p2 in points:
-                dist = self.points2dist(p1,p2)
-                distances.append(dist)
-                pairOfPoints.append(np.array([p1,p2]))
+        if n is None:
+            for p1 in points:
+                for p2 in points:
+                    dist = self.points2dist(p1,p2)
+                    distances.append(dist)
+                    pairOfPoints.append(np.array([p1,p2]))
+        else:
+            for p1 in points:
+                points2 = points[np.random.choice(len(points),n)]
+                for p2 in points2:
+                    
+                    while all(p2 == p1) or abs(p1[1]-p2[1])>np.pi or abs(p1[0]-p2[0])>np.pi:
+                        p2 = points[np.random.choice(len(points),1)][0]
+                    dist = self.points2dist(p1,p2)
+                    distances.append(dist)
+                    pairOfPoints.append(np.array([p1,p2]))
+                    
         return (np.array(pairOfPoints), np.array(distances))
 
     def points2dist(self,p1,p2):
