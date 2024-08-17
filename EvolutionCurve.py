@@ -4,7 +4,7 @@ from DataGeneration import DataGenerator
 # from tensorNetwork import tensorNetwork
 from scipy.interpolate import BSpline,splprep,splev
 from tqdm import tqdm
-from geneticalgorithm import geneticalgorithm as ga
+
 
 import keras
 class GradientDescentCurve:

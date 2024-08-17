@@ -13,6 +13,21 @@ N = 30
 def transpose(w):
     return  tf.einsum("abcd->abdc",w)
 
+class FillTriangular(keras.Layer):
+    def call(self, x):
+        return tfp.math.fill_triangular(x)
+
+class ABS(keras.Layer):
+    def call(self, x):
+        return tf.abs(x)
+    
+class MULTIPLY(keras.Layer):
+    def __init__(self,inputSize, *, activity_regularizer=None, trainable=True, dtype=None, autocast=True, name=None, **kwargs):
+        self.inputSize = inputSize
+        super().__init__(activity_regularizer=activity_regularizer, trainable=trainable, dtype=dtype, autocast=autocast, name=name, **kwargs)
+    def call(self, x):
+        return tf.math.multiply(x,tf.eye(self.inputSize,dtype="float32"))
+    
 class tensorNetwork():
     def __init__(self,inputSize,structure,pathfinder:EvolutionaryCurve) -> None:
         # self.nn =keras.models.Sequential()
@@ -28,15 +43,15 @@ class tensorNetwork():
         # tensor = keras.layers.Reshape((-1,inputSize,inputSize))(tensorElements)
         
         tensorElements = keras.layers.Dense( (inputSize**2 - inputSize)//2 + inputSize ,dtype='float32')(x)
-        b = tfp.bijectors.FillTriangular()
-        tensor = b.forward(tensorElements)        
-        diagonal = tf.math.multiply(tensor,tf.eye((inputSize),dtype="float32"))
-        positiveTensor = tensor+2*tf.abs(diagonal)
+        # b = tfp.bijectors.FillTriangular()
+        tensor = FillTriangular()(tensorElements)        
+        diagonal = MULTIPLY(inputSize)(tensor,)
+        positiveTensor = keras.layers.Add()([tensor,2*ABS()(diagonal)])
         # tensor = keras.layers.Reshape((-1,inputSize,inputSize))(tensor)
         #transposed= keras.layers.EinsumDense("abcd->abdc",(-1,-1,inputSize,inputSize))(tensor)
         transposed= keras.layers.Lambda( (transpose) )(positiveTensor)
         
-        symetric = tf.matmul(positiveTensor,transposed)
+        symetric = positiveTensor*transposed
         self.nn = keras.Model(inputs = input,outputs = symetric)
         self.nn.compile("adam",loss="mse")
         self.pathfinder = pathfinder
@@ -208,11 +223,11 @@ def save_model(name,model):
     print("Saved model to disk")          
 if __name__=="__main__":
     sp = GradientDescentCurve(np.array([0,1]),None,pop_size=2,epochs=50,scale=0.01)
-    tens = tensorNetwork(2,[350,350,100],sp)
-    tens.load_model()
+    tens = tensorNetwork(2,[50,50,10],sp)
+    # tens.load_model()
     
     sg = DataGenerator(1)
-    points = sg.generate_2d_internal_sphere(60)
+    points = sg.generate_2d_internal_sphere(50)
     pointsPair,dists = sg.distances(points,2)
 
 
