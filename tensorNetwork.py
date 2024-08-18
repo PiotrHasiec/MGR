@@ -102,7 +102,7 @@ class tensorNetwork():
                 history = self.pathfinder.fit_all(epochs=60)
                 
             score,curve = zip(*history)
-            geodesic = [np.array(c).T for c in curve[np.argmin(score)]]
+            geodesic = [np.array(c).T for c in curve[-1]]
             print(np.min(score))
             if len(to_delete_x) >0:
                 for d in to_delete_x:
