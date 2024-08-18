@@ -64,7 +64,7 @@ class tensorNetwork():
             loaded_model_json = plik.read()
                 
         model = keras.models.model_from_json(loaded_model_json)
-        model.load_weights(path+".h5")
+        model.load_weights(path+".weights.h5")
         self.nn = model
     def train(self,x,y,epochs=10,init_n=0):
         self.optimizer=keras.optimizers.Adam(learning_rate=0.0001)
@@ -219,21 +219,21 @@ def save_model(name,model):
     with open(name+".json", "w") as json_file:
         json_file.write(model_json)
     # serialize weights to HDF5
-    model.save_weights(name+".h5")
+    model.save_weights(name+".weights.h5")
     print("Saved model to disk")          
 if __name__=="__main__":
     sp = GradientDescentCurve(np.array([0,1]),None,pop_size=2,epochs=50,scale=0.01)
-    tens = tensorNetwork(2,[50,50,10],sp)
+    tens = tensorNetwork(2,[250,250,30],sp)
     # tens.load_model()
     
     sg = DataGenerator(1)
-    points = sg.generate_2d_internal_sphere(50)
-    pointsPair,dists = sg.distances(points,2)
+    points = sg.generate_2d_internal_sphere(45)
+    pointsPair,dists = sg.distances(points,3)
 
-
-    # tens.train(pointsPair,dists,10,10)
+    save_model("model_gpu",tens.nn)
+    tens.train(pointsPair,dists,5,5)
     tens.train(pointsPair,dists,15)
-    save_model("model",tens.nn)
+    save_model("model_gpu",tens.nn)
     
     
     points = sg.generate_2d_internal_sphere(55)
@@ -242,9 +242,4 @@ if __name__=="__main__":
     # 
     tens.train(pointsPair,dists)
 
-    model_json = tens.nn.to_json()
-    with open("model.json", "w") as json_file:
-        json_file.write(model_json)
-    # serialize weights to HDF5
-    tens.nn.save_weights("model.h5")
-    print("Saved model to disk")
+    save_model("model_gpu",tens.nn)

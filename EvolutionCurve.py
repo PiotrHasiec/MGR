@@ -204,7 +204,7 @@ class EvolutionaryCurve_:
             varbonds += [ [k-disp,k+disp] for k in knots[i][0:-2] ] 
         vartype = 'real'
         varbonds=np.array(varbonds)
-        self.ga = ga(self.score,dimension= len(varbonds),variable_type=vartype,variable_boundaries=varbonds,algorithm_parameters=algorithm_param)
+        # self.ga = ga(self.score,dimension= len(varbonds),variable_type=vartype,variable_boundaries=varbonds,algorithm_parameters=algorithm_param)
         
     def score(self,X):
             
