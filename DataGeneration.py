@@ -99,7 +99,7 @@ class DataGenerator:
         
         c_d = np.sqrt(dx**2 + dy**2 + dz**2)
         c_a = np.arcsin( 0.5*c_d/self.radius)
-        dist= (self.radius*c_a)**2
+        dist= (self.radius*c_a)
         
         # dist = (p1[0]-p2[0])**2 +(p1[1]-p2[1])**2
         return dist

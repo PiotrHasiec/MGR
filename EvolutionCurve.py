@@ -65,64 +65,57 @@ class GradientDescentCurve:
             history.append((lenght.numpy(),tf.convert_to_tensor(geodesic).numpy().T))#
         return history
     
-    def fit_all(self,epochs = None):
+    def fit_all(self,epochs = None,batch_parts = 1):
             history = []
-            population = self.knots
-            optimizer = keras.optimizers.AdamW(learning_rate=0.01)
+            # population = self.knots
             
-            geodesic = [tf.Variable(population.T[0],dtype="float32",trainable=False) ]+[tf.Variable(var,dtype="float32") for var in population.T[1:-1] ]+[tf.Variable(population.T[-1],dtype="float32",trainable=False) ]
-            if epochs == None:
-                epochs=self.epochs
-            for e in tqdm(range(epochs)):
-                with  tf.GradientTape() as tape:        
-                    tape.watch(geodesic)
-                    geodesic2 = tf.transpose(tf.stack(geodesic,axis=1))
-                    # geodesic_mod=tf.math.floormod(geodesic,tf.ones_like(geodesic)*np.pi)
-                    if self.model is None:
-                        tensors = np.array([[np.eye(len(self.knots[0]))]*len(self.knots[0].T)]*len(self.knots))
-            
-                    else:
-                        # path = self.population[i][1].T[np.newaxis]
-                        tensors =self.model(geodesic2)
-                        tensors = tensors
-            #         dx_j = []
-                    # diff = tf.convert_to_tensor([ai-bi for ai,bi in zip(geodesic2[:,1:],geodesic2[:,:-1])])
-                    diff = geodesic2[:,1:]-geodesic2[:,:-1]
-                    tensors_i = (tensors[:,1:]+tensors[:,:-1])/2.
-                    lenghts = (tf.einsum("ijk,ijkl,ijl->ij",diff,tensors_i,diff))
-                    lenghts = tf.einsum("ij->i",lenghts)
-            #         diff = tf.convert_to_tensor([ai-bi for ai,bi in zip(geodesic[1:],geodesic[:-1])])
-            #         tensor_i = (tensors[1:]+tensors[:-1])/2.
-            #         dx_j2 = tf.einsum("ki,kij,kj->k",diff,tensor_i,diff)
-                    
-            #         # for j in range( len(geodesic)-1):
-            #         #     v = tf.reshape(geodesic[j]-geodesic[j+1],(-1,1))
-            #         #     # vT = tf.transpose(v)
-            #         #     tensor_ij = ((tensors[j]+tensors[j+1])/2)
-            #         #     # vTM = tf.matmul(vT,tensor_ij)
-            #         #     # vTMv = tf.matmul(vTM,v)
-            #         #     vTMv2 = tf.einsum("ji,jk,kl->il",v,tensor_ij,v)
+            to_return_score =[]
+            to_return_paths =[]
+            batch_size = len(self.knots)//int(batch_parts)
+            for i in range(batch_parts+1):
+                optimizer = keras.optimizers.AdamW(learning_rate=0.01)
+                population =  self.knots[batch_size*i:batch_size*(i+1)]
+
+                geodesic = [tf.Variable(population.T[0],dtype="float32",trainable=False) ]+[tf.Variable(var,dtype="float32") for var in population.T[1:-1] ]+[tf.Variable(population.T[-1],dtype="float32",trainable=False) ]
+                if len(population) == 0:
+                    continue
+                if epochs == None:
+                    epochs=self.epochs
+                for e in tqdm(range(epochs)):
+                    with  tf.GradientTape() as tape:        
+                        tape.watch(geodesic)
+                        geodesic2 = tf.transpose(tf.stack(geodesic,axis=1))
+                        # geodesic_mod=tf.math.floormod(geodesic,tf.ones_like(geodesic)*np.pi)
+                        if self.model is None:
+                            tensors = np.array([[np.eye(len(self.knots[0]))]*len(self.knots[0].T)]*len(self.knots))
+                
+                        else:
+                            # path = self.population[i][1].T[np.newaxis]
+                            tensors =self.model(geodesic2)
+                            tensors = tensors
+                #         dx_j = []
+                        # diff = tf.convert_to_tensor([ai-bi for ai,bi in zip(geodesic2[:,1:],geodesic2[:,:-1])])
+                        diff = geodesic2[:,1:]-geodesic2[:,:-1]
+                        tensors_i = (tensors[:,1:]+tensors[:,:-1])/2.
+                        lenghts = (tf.einsum("ijk,ijkl,ijl->ij",diff,tensors_i,diff))
+                        lenghts_to_return = (tf.einsum("ij->i",tf.sqrt(lenghts)))
+                        lenghts = (tf.einsum("ij->i",lenghts))
+                        # lenghts = tf.einsum("ij->i",tf.sqrt(lenghts))
+
                         
-            #         #     dx_j.append(vTMv2)
-            #         lenght = ( tf.reduce_sum( tf.sqrt(dx_j2)) )
-            #         # print(lenght.numpy())
-                    
-                    gradients = tape.gradient(lenghts,geodesic[1:-1])
-                    
-                    # min_ = tf.argmin(lenghts).numpy()
-                    optimizer.apply_gradients(zip(gradients,geodesic[1:-1]))
-                    history.append(( lenghts.numpy(),np.array(geodesic).T ))
-            #     self.population[i] = (0,tf.convert_to_tensor(tf.math.floormod(geodesic,tf.ones_like(geodesic)*np.pi*2)).numpy().T,0)
-            # history.append((lenght.numpy(),tf.convert_to_tensor(geodesic).numpy().T))#
-            # return history
-            # print(lenghts[min_].numpy())
-            self.knots = history[-1][1]
-            return history
+
+                        gradients = tape.gradient(lenghts,geodesic[1:-1])
+                
+                        optimizer.apply_gradients(zip(gradients,geodesic[1:-1]))
+                        history.append(( lenghts_to_return.numpy(),np.array(geodesic).T ))
+                score,paths = history[-1]
+                to_return_score.extend(score)
+                to_return_paths.extend(paths)
+
+            self.knots = np.array(to_return_paths)
+            return zip(to_return_score,to_return_paths)
     def mutate(self,i, iffirst = False):
         spline = self.population[i][1]
-        # for coof_i in range( len(spline)):
-        #     if np.random.uniform(0,1) <= 0.05:
-        #         self.population[i][1][coof_i][1:-1] += np.random.normal(0,self.scale,len(self.population[i][1][coof_i][1:-1]))
         ch = self.population[i][1].T
         for j in range(1,len(spline.T)-2):
             if np.random.uniform(0,1) <= 0.05 :
@@ -275,7 +268,7 @@ class EvolutionaryCurve:
            
                 
         self.scores=scores
-        print(np.min(scoresval))
+        # print(np.min(scoresval))
         return history
             
     
